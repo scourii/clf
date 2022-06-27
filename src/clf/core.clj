@@ -8,15 +8,24 @@
   (->> (.listFiles (File. directory))
        (filter #(not (.isHidden %)))
        (sort)
-       (map #(.getName %))))
+       (map #(.getName %))
+       (str/join \newline)))
 
 (defn list-hidden
   [directory]
   (->> (.listFiles (File. directory))
        (sort)
        (map #(.getName %))
-       (str/join \newline)
-       (println)))
+       (str/join \newline)))
+
+(defn list-recursive
+  [directory] 
+  (let [dir? #(.isDirectory %)]
+    (->> (tree-seq dir? #(.listFiles %) (File. directory))
+         (filter (comp not dir?))
+         (sort) 
+         (map #(.getPath %)) 
+         (str/join \newline))))
 
 (defn- usage
   [options]
@@ -29,13 +38,15 @@
        (println)))
 
 (def cli-options
-  [["-a" "--all" "do not ignore entries starting with ."
-    :default "."]
-   [nil  "--test"]
+  [["-a" "--all" "do not ignore entries starting with ."]
+   ["nil" "--test"] 
+   ["-R" "--recursive" "list subdirectories recursively"]
    ["-h" "--help" "Print this help information"]])
 
 (defn -main [& args]
-  (let [{:keys [options arguments summary errors]} (parse-opts args cli-options)]
+  (let [{:keys [options arguments summary]} (parse-opts args cli-options)]
+    (println arguments)
+    (println options)
     (if (empty? (second arguments))
       (def directory ".")
       (def directory (second arguments)))
@@ -45,7 +56,10 @@
       (usage summary)
 
       (:all options)
-      (list-hidden directory)
+      (println (list-hidden directory))
+
+      (:recursive options)
+      (println (list-recursive directory)))
 
       (empty? options)
-      (list-files directory)))) 
+      (println (list-files directory))))

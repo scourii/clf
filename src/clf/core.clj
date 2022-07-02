@@ -12,10 +12,6 @@
        (if (.isDirectory (File. item))
         (ansi/bold-cyan (.getName (File. item)))
         (.getName (File. item)))))))
-  
-      ;;  (map (fn [x]
-      ;;         ((if (.isDirectory x) ansi/bold-cyan ansi/white)
-      ;;          (.getName x))))))
 
 (defn list-files
   [directory]

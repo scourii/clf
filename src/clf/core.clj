@@ -58,14 +58,20 @@
    ["-C" "--colorize" "use terminal colors for output"]
    ["-h" "--help" "Print this help information"]])
 
-(defn -main [& args]
-  (let [{:keys [options arguments summary]} (parse-opts args cli-options)]
-    (let [directory (if (str/blank? (second arguments))
-                      "."
-                      (second arguments))]
-      (case options
-        :help (usage summary)
-        :all (println (list-hidden directory))
-        :recursive (println (list-recursive directory))
-        :colorize (colorize-output (get-path directory))
-        (println (list-files directory))))))
+(defn -main 
+  [& args]
+  (let [{:keys [options arguments summary]} (parse-opts args cli-options)
+        directory (if (str/blank? (second arguments))
+                    "."
+                    (second arguments))]
+      (cond
+        (:help options)
+        (usage summary)
+        (:all options)
+        (println (list-hidden directory))
+        (:recursive options) 
+        (println (list-recursive directory))
+        (:colorize options)
+        (colorize-output (get-path directory))
+        (empty? options)
+        (println (list-files directory)))))
